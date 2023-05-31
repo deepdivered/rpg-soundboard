@@ -241,12 +241,13 @@ BLACK = 0x000000
 import time
 import board
 import audioio
+import gc
 #  import audiocore
 import audiomixer
 import adafruit_fancyled.adafruit_fancyled as fancy
 import adafruit_trellism4
 #  import digitalio
-import audiomp3 
+import audiomp3
 
 from color_names import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
@@ -276,15 +277,15 @@ with open("soundboard.txt", "r") as f:
                 SAMPLES.append((f_name.strip(), eval(color.strip())))
 
 # set led brightness
-trellis.pixels.brightness = 0.1   
-           
+trellis.pixels.brightness = 0.1
+
 # Play the welcome mp3 (if its there) and run intro sequence
 # with audioio.AudioOut(board.A1) as audio: # mono
 with audioio.AudioOut(board.A1, right_channel=board.A0) as audio:  # stereo
     try:
         f = open("welcome.mp3", "rb")
-        mp = audiomp3.MP3Decoder(f)
-        audio.play(mp)
+        mp3 = audiomp3.MP3Decoder(f)
+        audio.play(mp3)
         swirl = 0  # we'll swirl through the colors in the gradient
         while audio.playing:
             for i in range(32):
@@ -300,8 +301,10 @@ with audioio.AudioOut(board.A1, right_channel=board.A0) as audio:  # stereo
         # just hold a moment
         time.sleep(0.5)
     except OSError:
-        # no welcome.mp3 file 
+        # no welcome.mp3 file
         pass
+gc.collect()
+mp3.deinit()
 
 # Parse the first file to figure out what format its in
 channel_count = None
@@ -314,7 +317,7 @@ with open(SAMPLE_FOLDER+SAMPLES[0][0], "rb") as f:
     sample_rate = mp3.sample_rate
     print("%d channels, %d bits per sample, %d Hz sample rate " %
           (mp3.channel_count, mp3.bits_per_sample, mp3.sample_rate))
-    
+
     # Audio playback object - we'll go with either mono or stereo depending on
     # what we see in the first file
     if mp3.channel_count == 1:
@@ -324,10 +327,10 @@ with open(SAMPLE_FOLDER+SAMPLES[0][0], "rb") as f:
     else:
         raise RuntimeError("Must be mono or stereo mp3s!")
 
-mixer = audiomixer.Mixer(voice_count=2, 
-        sample_rate=sample_rate, 
-        channel_count=channel_count, 
-        bits_per_sample=bits_per_sample, 
+mixer = audiomixer.Mixer(voice_count=2,
+        sample_rate=sample_rate,
+        channel_count=channel_count,
+        bits_per_sample=bits_per_sample,
         samples_signed=True)
 audio.play(mixer)
 
@@ -379,15 +382,17 @@ while True:
     for down in just_pressed:
         sample_num = down[1]*8 + down[0]
         try:
+            gc.collect()  
             filename = SAMPLE_FOLDER+SAMPLES[sample_num][0]
             f = open(filename, "rb")
             mp3 = audiomp3.MP3Decoder(f)
             print(sample_num, filename)
-            # Check to see if its background music 
+            # Check to see if its background music
             if filename[9:13] == "bgm_":
                 # Check if sample is already playing then stop it
-                if current_background["sample_num"] == sample_num: 
+                if current_background["sample_num"] == sample_num:
                     stop_playing_sample(current_background)
+                    gc.collect()
                     break
                 # Check to see if it needs to loop
                 will_loop = False
@@ -397,6 +402,7 @@ while True:
                 if current_background["voice"] is not None:
                     print("Interrupt")
                     stop_playing_sample(current_background)
+                    gc.collect()
                 trellis.pixels[down] = WHITE
                 mixer.play(mp3, voice=0, loop=will_loop)
                 current_background = {
@@ -409,6 +415,7 @@ while True:
                 if currently_playing["voice"] is not None:
                     print("Interrupt")
                     stop_playing_sample(currently_playing)
+                    gc.collect()
                 trellis.pixels[down] = WHITE
                 mixer.play(mp3, voice=1, loop=False)
                 currently_playing = {
@@ -424,8 +431,10 @@ while True:
     if not mixer.playing:
         if currently_playing["voice"] is not None:
             stop_playing_sample(currently_playing)
+            gc.collect()
         if current_background["voice"] is not None:
             stop_playing_sample(current_background)
+            gc.collect()            
 
     time.sleep(0.01)  # a little delay here helps avoid debounce annoyances
     current_press = pressed
