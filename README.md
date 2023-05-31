@@ -268,6 +268,11 @@ with audioio.AudioOut(board.A1, right_channel=board.A0) as audio:  # stereo
                 # print(palette_index, fancy.denormalize(color)) display RGB of swirl
                 trellis.pixels[(i % 8, i//8)] = color.pack()
             swirl += 1
+            #  key press stops intro
+            pressed_buttons = trellis.pressed_keys
+            if pressed_buttons:
+                mp3.deinit()
+                
             time.sleep(0.005)
         f.close()
         # Clear all pixels
