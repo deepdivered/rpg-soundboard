@@ -89,10 +89,10 @@ with open(SAMPLE_FOLDER+SAMPLES[0][0], "rb") as f:
         raise RuntimeError("Must be mono or stereo mp3s!")
 
 mixer = audiomixer.Mixer(voice_count=2, 
-    sample_rate=sample_rate, 
-    channel_count=channel_count, 
-    bits_per_sample=bits_per_sample, 
-    samples_signed=True)
+        sample_rate=sample_rate, 
+        channel_count=channel_count, 
+        bits_per_sample=bits_per_sample, 
+        samples_signed=True)
 audio.play(mixer)
 
 # Clear all pixels
@@ -127,7 +127,8 @@ for i, v in enumerate(SAMPLES):
 def stop_playing_sample(playback_details):
     print("playing: ", playback_details)
     mixer.stop_voice(playback_details["voice"])
-    trellis.pixels[playback_details["neopixel_location"]] = playback_details["neopixel_color"]
+    trellis.pixels[playback_details["neopixel_location"]] = playback_details["\
+    neopixel_color"]
     playback_details["file"].close()
     playback_details["voice"] = None
     playback_details["sample_num"] = None
