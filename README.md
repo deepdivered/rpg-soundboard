@@ -2,6 +2,32 @@
 I tried this original sound board project. you can see the original project here https://github.com/israelperez/heroquest The biggest issue i had is the 8mb storage limit. I saw there is mp3 support for circuit python.  https://learn.adafruit.com/circuitpython-essentials/circuitpython-mp3-audio
 Mp3 files are 5x or more smaller that wav files. 
 
+i have it mostly working save for one issue.  in code.py
+
+i sourced the mp3 code from this page
+https://learn.adafruit.com/circuitpython-essentials/circuitpython-mp3-audio?gclid=CjwKCAjwvdajBhBEEiwAeMh1Uz-x2iRGlM9foVp4jV5koHB5J4dBPmpb5SktlmdRixIAt2SU-CujzhoC9hIQAvD_BwE
+
+and this one
+
+https://learn.adafruit.com/mp3-circuitpython-lars?view=all
+
+
+the issue i am having is after playing sounds a few times i get a error. here is an example.
+1 /samples/sea_monster_1.mp3
+Traceback (most recent call last):
+  File "code.py", line 148, in <module>
+MemoryError: memory allocation failed, allocating 8708 bytes
+
+and one more
+
+29 /samples/bgm_ship storm-loop.mp3
+0 /samples/cannon_hit.mp3
+Interrupt
+playing:  {'neopixel_location': (1, 2), 'neopixel_color': 57378, 'voice': 1, 'sample_num': 17, 'file': <io.FileIO 0x20024680>}
+Traceback (most recent call last):
+  File "code.py", line 148, in <module>
+MemoryError: memory allocation failed, allocating 8708 bytes
+
 # NeoTrellis M4 Soundboard
 
 ![Photo of finished soundboard](https://raw.githubusercontent.com/israelperez/heroquest/main/soundboard/images/step-final-b.png)
